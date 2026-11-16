@@ -1,0 +1,357 @@
+/*
+ * Copyright (C) 2026 Philip Helger (www.helger.com)
+ * philip[at]helger[dot]com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.helger.phinvoice.ubl;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.w3c.dom.Document;
+
+import com.helger.annotation.Nonempty;
+import com.helger.base.string.StringHelper;
+import com.helger.datetime.xml.XMLOffsetDate;
+import com.helger.diagnostics.error.SingleError;
+import com.helger.diagnostics.error.list.ErrorList;
+import com.helger.en16931.basics.codelist.EN16931CodeLists;
+import com.helger.jaxb.GenericJAXBMarshaller;
+import com.helger.phinvoice.model.PhinvoiceIdentifier;
+import com.helger.phinvoice.model.PhinvoiceInvoice;
+import com.helger.phinvoice.model.PhinvoiceInvoiceNote;
+import com.helger.xsds.ccts.cct.schemamodule.IdentifierType;
+import com.helger.xsds.ccts.cct.schemamodule.TextType;
+
+/**
+ * Base class of the edition specific UBL readers. It only contains helpers that work on types that
+ * are shared between UBL 2.1 and UBL 2.5 (plain strings, dates and the CCTS base types that all UBL
+ * basic components extend). Everything that touches the version specific JAXB types of
+ * {@code commonaggregatecomponents_21} / {@code _25} has to stay in the edition specific reader,
+ * because the two sets of classes are unrelated.
+ *
+ * @author Philip Helger
+ */
+abstract class AbstractUblInvoiceReader
+{
+  /** The tax scheme of a VAT identifier (BT-31, BT-48, BT-63). */
+  protected static final String TAX_SCHEME_VAT = "VAT";
+
+  /** The tax scheme of a national tax registration (BT-32) in the 2026 binding. */
+  protected static final String TAX_SCHEME_LOCAL = "LOC";
+
+  /** The label of a tax registration that EN 16931 has no term for. */
+  protected static final String TERM_TAX_REGISTRATION = "additional.taxregistration";
+
+  /** The label of a document reference of a line that is no object identifier (BT-128). */
+  protected static final String TERM_LINE_DOCUMENT = "additional.linedocument";
+
+  /** The label of {@code cbc:InstructionNote} of a payment means, which is no term of EN 16931. */
+  protected static final String TERM_PAYMENT_INSTRUCTION_NOTE = "additional.paymentinstructionnote";
+
+  /** The label of {@code cbc:NetworkID} of a card account, which is no term of EN 16931. */
+  protected static final String TERM_CARD_NETWORK = "additional.cardnetwork";
+
+  /** The label of the document type text of a supporting document, which has no term. */
+  protected static final String TERM_DOCUMENT_TYPE = "additional.documenttype";
+
+  /** The scheme identifier of the SEPA creditor identifier (BT-90) in a party identification. */
+  protected static final String SEPA_SCHEME_ID = EN16931CodeLists.CREDITOR_REFERENCE_SCHEME_ID;
+
+  // Not part of the binding, but the common filler of Peppol documents
+  private static final String PEPPOL_FILLER = "NA";
+
+  private static final String ROOT_INVOICE = "Invoice";
+  private static final String ROOT_CREDIT_NOTE = "CreditNote";
+
+  /**
+   * Get the UBL version this reader handles.
+   *
+   * @return The UBL version this reader handles, e.g. {@code 2.1}. Used for messages only.
+   */
+  @NonNull
+  @Nonempty
+  protected abstract String _getUblVersion ();
+
+  /**
+   * Read the already parsed document as UBL Invoice.
+   *
+   * @param aDoc
+   *        The parsed document, whose root element is {@code Invoice}. Never {@code null}.
+   * @param aErrors
+   *        The error list to fill. Never {@code null}.
+   * @return {@code null} if the document does not match the UBL Invoice schema.
+   */
+  @Nullable
+  protected abstract PhinvoiceInvoice readInvoiceDocument (@NonNull Document aDoc, @NonNull ErrorList aErrors);
+
+  /**
+   * Read the already parsed document as UBL CreditNote.
+   *
+   * @param aDoc
+   *        The parsed document, whose root element is {@code CreditNote}. Never {@code null}.
+   * @param aErrors
+   *        The error list to fill. Never {@code null}.
+   * @return {@code null} if the document does not match the UBL CreditNote schema.
+   */
+  @Nullable
+  protected abstract PhinvoiceInvoice readCreditNoteDocument (@NonNull Document aDoc, @NonNull ErrorList aErrors);
+
+  /**
+   * Check if a tax amount is the invoice total VAT amount in the VAT accounting currency (BT-111).
+   * An amount in the invoice currency is BT-110. If BT-6 names the same currency as BT-5, the first
+   * amount is BT-110 and the next one BT-111, because the writers write them in this order.
+   *
+   * @param sInvoiceCurrency
+   *        BT-5. May be {@code null}.
+   * @param sAccountingCurrency
+   *        BT-6. May be {@code null}.
+   * @param sAmountCurrency
+   *        The currency of the tax amount. May be {@code null}.
+   * @param bInvoiceTotalTaken
+   *        {@code true} if BT-110 was already read.
+   * @return {@code true} for BT-111, {@code false} for BT-110.
+   */
+  protected static boolean isVatAccountingAmount (@Nullable final String sInvoiceCurrency,
+                                                  @Nullable final String sAccountingCurrency,
+                                                  @Nullable final String sAmountCurrency,
+                                                  final boolean bInvoiceTotalTaken)
+  {
+    return sAccountingCurrency != null &&
+           sAccountingCurrency.equals (sAmountCurrency) &&
+           (!sAccountingCurrency.equals (sInvoiceCurrency) || bInvoiceTotalTaken);
+  }
+
+  /**
+   * Trim a value of the source. All readers do this with every text they take over.
+   *
+   * @param sValue
+   *        The value. May be {@code null}.
+   * @return The trimmed value or {@code null} if nothing remains.
+   */
+  @Nullable
+  protected static String str (@Nullable final String sValue)
+  {
+    if (sValue == null)
+      return null;
+
+    final String sTrim = sValue.trim ();
+    return sTrim.isEmpty () ? null : sTrim;
+  }
+
+  /**
+   * Get a value that UBL requires even if the business term is absent: the binding prescribes the
+   * filler {@link EN16931CodeLists#MISSING_VALUE_PLACEHOLDER} for BT-13, BT-132, BT-190, BT-192,
+   * BT-199 and BT-201. Peppol documents use {@value #PEPPOL_FILLER} in the same places.
+   *
+   * @param sValue
+   *        The value of the element. May be {@code null}.
+   * @return The trimmed value or {@code null} if it is empty or a filler.
+   */
+  @Nullable
+  protected static String strWithoutFiller (@Nullable final String sValue)
+  {
+    final String ret = str (sValue);
+    return EN16931CodeLists.MISSING_VALUE_PLACEHOLDER.equals (ret) || PEPPOL_FILLER.equals (ret) ? null : ret;
+  }
+
+  @Nullable
+  protected static String strFromCode (@Nullable final String sValue)
+  {
+    return str (sValue);
+  }
+
+  @Nullable
+  protected static LocalDate d (@Nullable final XMLOffsetDate aDate)
+  {
+    return aDate == null ? null : aDate.toLocalDate ();
+  }
+
+  @NonNull
+  protected static String joinNotes (@NonNull final List <? extends TextType> aNotes)
+  {
+    final StringBuilder aSb = new StringBuilder ();
+    for (final TextType aN : aNotes)
+    {
+      final String sNote = str (aN.getValue ());
+      if (sNote == null)
+        continue;
+      if (aSb.length () > 0)
+        aSb.append ('\n');
+      aSb.append (sNote);
+    }
+    return aSb.toString ();
+  }
+
+  /**
+   * Join all texts of a repeated element, each on a line of its own.
+   *
+   * @param aTexts
+   *        The elements. Never {@code null}.
+   * @return The joined text or {@code null} if nothing remains.
+   */
+  @Nullable
+  protected static String joinTexts (@NonNull final List <? extends TextType> aTexts)
+  {
+    return str (joinNotes (aTexts));
+  }
+
+  /**
+   * Convert any UBL identifier element (ID, CompanyID, EndpointID, ...) into a model identifier
+   * without touching the value.
+   *
+   * @param aID
+   *        The identifier element. May be {@code null}.
+   * @return {@code null} if the element is {@code null}, otherwise the value together with its
+   *         scheme ID.
+   */
+  @Nullable
+  protected static PhinvoiceIdentifier identifier (@Nullable final IdentifierType aID)
+  {
+    return aID == null ? null : new PhinvoiceIdentifier (str (aID.getValue ()), str (aID.getSchemeID ()));
+  }
+
+  /**
+   * Get the text of a document reference of a line that is no object identifier (BT-128).
+   *
+   * @param aID
+   *        The identifier element. Never {@code null}.
+   * @param sTypeCode
+   *        The type code of the document. May be {@code null}.
+   * @return The identifier with its scheme, followed by the type code.
+   */
+  @NonNull
+  protected static String getLineDocumentText (@NonNull final IdentifierType aID, @Nullable final String sTypeCode)
+  {
+    final String sScheme = str (aID.getSchemeID ());
+    return (sScheme == null ? "" : sScheme + ":") +
+           StringHelper.getNotNull (str (aID.getValue ())) +
+           (sTypeCode == null ? "" : " (" + sTypeCode + ")");
+  }
+
+  /**
+   * Add an identifier to a list, if it has a value.
+   *
+   * @param aID
+   *        The identifier element. May be {@code null}.
+   * @param aTarget
+   *        The list to add to. Never {@code null}.
+   */
+  protected static void addIdentifier (@Nullable final IdentifierType aID,
+                                       @NonNull final List <PhinvoiceIdentifier> aTarget)
+  {
+    final PhinvoiceIdentifier aOut = identifier (aID);
+    if (aOut != null && aOut.getValue () != null)
+      aTarget.add (aOut);
+  }
+
+  /**
+   * Check if a party identification is the bank assigned creditor identifier BT-90 and not a party
+   * identifier.
+   *
+   * @param aID
+   *        The identifier element. May be {@code null}.
+   * @return {@code true} if it has the scheme of BT-90-1.
+   */
+  protected static boolean isSepaCreditorID (@Nullable final IdentifierType aID)
+  {
+    return aID != null && SEPA_SCHEME_ID.equals (str (aID.getSchemeID ()));
+  }
+
+  /**
+   * Parse a {@code cbc:Note}. The convention is a subject code embedded as "#code#" prefix, e.g.
+   * "#AAB#Some note".
+   *
+   * @param sRaw
+   *        The value of the note. May be {@code null}.
+   * @return The note or {@code null} if it is empty.
+   */
+  @Nullable
+  protected static PhinvoiceInvoiceNote parseInvoiceNote (@Nullable final String sRaw)
+  {
+    final String sNote = str (sRaw);
+    if (sNote == null)
+      return null;
+
+    if (sNote.startsWith ("#"))
+    {
+      final int nEnd = sNote.indexOf ('#', 1);
+      if (nEnd > 1)
+        return new PhinvoiceInvoiceNote (sNote.substring (1, nEnd), sNote.substring (nEnd + 1));
+    }
+    return new PhinvoiceInvoiceNote (null, sNote);
+  }
+
+  /**
+   * Unmarshal a document. The events of the XSD validation go to the error list instead of the log.
+   * The first error ends the reading, as with the default event handler.
+   *
+   * @param <T>
+   *        The JAXB type.
+   * @param aMarshaller
+   *        The marshaller to use. It is changed by this method. Never {@code null}.
+   * @param aDoc
+   *        The parsed document. Never {@code null}.
+   * @param aErrors
+   *        The error list to fill. Never {@code null}.
+   * @return {@code null} if the document does not match the schema.
+   */
+  @Nullable
+  protected static <T> T unmarshal (@NonNull final GenericJAXBMarshaller <T> aMarshaller,
+                                    @NonNull final Document aDoc,
+                                    @NonNull final ErrorList aErrors)
+  {
+    aMarshaller.setCollectErrors (aErrors);
+    // The events are in the error list already, the default callback logs them with their value
+    aMarshaller.readExceptionCallbacks ().removeAll ();
+    return aMarshaller.read (aDoc);
+  }
+
+  /**
+   * Read an already parsed UBL document. The root element decides whether the document is read as
+   * Invoice or as CreditNote, so the document is neither parsed again nor tried against both
+   * schemas. The document kind of the result comes from BT-3; the root element only decides it if
+   * BT-3 is missing or unknown.
+   *
+   * @param aDoc
+   *        The parsed document. Never {@code null}.
+   * @param aErrors
+   *        The error list to fill. Never {@code null}.
+   * @return The populated model or {@code null} if the document is neither a valid Invoice nor a
+   *         valid CreditNote of this reader's UBL version.
+   */
+  @Nullable
+  final PhinvoiceInvoice read (@NonNull final Document aDoc, @NonNull final ErrorList aErrors)
+  {
+    final String sRootName = aDoc.getDocumentElement ().getLocalName ();
+    final PhinvoiceInvoice ret;
+    if (ROOT_INVOICE.equals (sRootName))
+      ret = readInvoiceDocument (aDoc, aErrors);
+    else
+      if (ROOT_CREDIT_NOTE.equals (sRootName))
+        ret = readCreditNoteDocument (aDoc, aErrors);
+      else
+        ret = null;
+
+    if (ret == null)
+      aErrors.add (SingleError.builderError ()
+                              .errorText ("Source could not be parsed as UBL " +
+                                          _getUblVersion () +
+                                          " Invoice or CreditNote")
+                              .build ());
+    return ret;
+  }
+}

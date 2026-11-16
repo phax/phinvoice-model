@@ -1,0 +1,211 @@
+/*
+ * Copyright (C) 2026 Philip Helger (www.helger.com)
+ * philip[at]helger[dot]com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.helger.phinvoice.model;
+
+import java.time.LocalDate;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * BG-24 ADDITIONAL SUPPORTING DOCUMENT (0..n). Carries BT-122 (supporting document reference),
+ * BT-123 (document description), BT-124 (external document location URL) and BT-125 (attached
+ * binary document — with BT-125-1 mime code and BT-125-2 filename carried by
+ * {@link PhinvoiceAttachment}).
+ *
+ * @author Philip Helger
+ */
+public class PhinvoiceSupportingDocument
+{
+  private String m_sReference;
+  private String m_sDocumentTypeCode;
+  private String m_sDescription;
+  private String m_sExternalLocation;
+  private PhinvoiceAttachment m_aAttachment;
+  private LocalDate m_aIssueDate;
+
+  /** Create an empty supporting document. */
+  public PhinvoiceSupportingDocument ()
+  {}
+
+  /**
+   * Get the supporting document reference (BT-122).
+   *
+   * @return Supporting document reference (BT-122). May be {@code null}.
+   */
+  @Nullable
+  public String getReference ()
+  {
+    return m_sReference;
+  }
+
+  /**
+   * Set the supporting document reference (BT-122).
+   *
+   * @param sReference
+   *        Reference; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceSupportingDocument setReference (@Nullable final String sReference)
+  {
+    m_sReference = sReference;
+    return this;
+  }
+
+  /**
+   * Get the supporting document reference code (BT-122-1). The binding only knows the fixed value
+   * {@code 916}, so that value is left out and only another code is held here.
+   *
+   * @return The document type that differs from {@code 916}. May be {@code null}.
+   */
+  @Nullable
+  public String getDocumentTypeCode ()
+  {
+    return m_sDocumentTypeCode;
+  }
+
+  /**
+   * Set the supporting document reference code (BT-122-1).
+   *
+   * @param sDocumentTypeCode
+   *        The document type that differs from {@code 916}; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceSupportingDocument setDocumentTypeCode (@Nullable final String sDocumentTypeCode)
+  {
+    m_sDocumentTypeCode = sDocumentTypeCode;
+    return this;
+  }
+
+  /**
+   * Get the supporting document description (BT-123).
+   *
+   * @return Supporting document description (BT-123). May be {@code null}.
+   */
+  @Nullable
+  public String getDescription ()
+  {
+    return m_sDescription;
+  }
+
+  /**
+   * Set the supporting document description (BT-123).
+   *
+   * @param sDescription
+   *        Description; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceSupportingDocument setDescription (@Nullable final String sDescription)
+  {
+    m_sDescription = sDescription;
+    return this;
+  }
+
+  /**
+   * Get the external document location URL (BT-124).
+   *
+   * @return External document location URL (BT-124). May be {@code null}.
+   */
+  @Nullable
+  public String getExternalLocation ()
+  {
+    return m_sExternalLocation;
+  }
+
+  /**
+   * Set the external document location URL (BT-124).
+   *
+   * @param sExternalLocation
+   *        URL; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceSupportingDocument setExternalLocation (@Nullable final String sExternalLocation)
+  {
+    m_sExternalLocation = sExternalLocation;
+    return this;
+  }
+
+  /**
+   * Get the attached binary document (BT-125 with BT-125-1 mime and BT-125-2 filename).
+   *
+   * @return The attached binary document (BT-125 with BT-125-1 mime and BT-125-2 filename).
+   *         May be {@code null}.
+   */
+  @Nullable
+  public PhinvoiceAttachment getAttachment ()
+  {
+    return m_aAttachment;
+  }
+
+  /**
+   * Set the attached binary document (BT-125 / BT-125-1 / BT-125-2).
+   *
+   * @param aAttachment
+   *        Attachment; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceSupportingDocument setAttachment (@Nullable final PhinvoiceAttachment aAttachment)
+  {
+    m_aAttachment = aAttachment;
+    return this;
+  }
+
+  /**
+   * Get the document date (BT-X-149).
+   *
+   * @return Document date (BT-X-149). May be {@code null}.
+   */
+  @Nullable
+  public LocalDate getIssueDate ()
+  {
+    return m_aIssueDate;
+  }
+
+  /**
+   * Set the document date (BT-X-149).
+   *
+   * @param aIssueDate
+   *        The new value; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceSupportingDocument setIssueDate (@Nullable final LocalDate aIssueDate)
+  {
+    m_aIssueDate = aIssueDate;
+    return this;
+  }
+
+  /**
+   * Get the {@code true} when every field is {@code null}.
+   *
+   * @return {@code true} when every field is {@code null}.
+   */
+  public boolean isEmpty ()
+  {
+    return m_sReference == null &&
+           m_sDocumentTypeCode == null &&
+           m_sDescription == null &&
+           m_sExternalLocation == null &&
+           m_aAttachment == null &&
+           m_aIssueDate == null;
+  }
+}

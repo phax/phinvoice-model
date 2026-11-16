@@ -1,0 +1,23 @@
+phinvoice-model
+Copyright 2026 Philip Helger (www.helger.com)
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+--------------------------------------------------------------------------------
+Third-party components
+
+Runtime dependencies are resolved by Maven and keep their own licences.
+
+The EN 16931 part of the model in phinvoice-model-api, the CII readers in
+phinvoice-model-cii, the UBL readers in phinvoice-model-ubl and the test files
+in phinvoice-model-testfiles were taken
+over from phlox (https://github.com/phax/phlox), also licensed under the Apache
+License, Version 2.0.
+
+The example invoices in the module phinvoice-model-testfiles (directory
+src/main/resources/external/en16931) are used for testing only. They originate
+from publicly available EN 16931 example sets (among them the examples of CEN/TC
+434, of Peppol and of the XRechnung releases, partly taken over from the project
+en16931-cii2ubl). The origin of each set is described in the README.md of its
+directory. The files under synthetic/ were generated for phlox with
+phinvoice-model-testfiles/tools/generate-synthetic.py.

@@ -1,0 +1,192 @@
+/*
+ * Copyright (C) 2026 Philip Helger (www.helger.com)
+ * philip[at]helger[dot]com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.helger.phinvoice.model;
+
+import java.math.BigDecimal;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+/**
+ * BG-30 LINE VAT INFORMATION (1..1 on a line). Carries BT-151 (invoiced item VAT category code)
+ * and BT-152 (invoiced item VAT rate).
+ *
+ * @author Philip Helger
+ */
+public class PhinvoiceLineVat
+{
+  private String m_sCategoryCode;
+  private BigDecimal m_aRate;
+  private String m_sExemptionReasonText;
+  private String m_sExemptionReasonCode;
+  private BigDecimal m_aCalculatedAmount;
+  private String m_sVatPointDateCode;
+
+  /** Create an empty line VAT information record. */
+  public PhinvoiceLineVat ()
+  {}
+
+  /**
+   * Get the invoiced item VAT category code (BT-151) — UNTDID 5305. May be {@code null}.
+   *
+   * @return Invoiced item VAT category code (BT-151) — UNTDID 5305. May be {@code null}.
+   */
+  @Nullable
+  public String getCategoryCode ()
+  {
+    return m_sCategoryCode;
+  }
+
+  /**
+   * Set the invoiced item VAT category code (BT-151).
+   *
+   * @param sCategoryCode
+   *        UNTDID 5305 code; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceLineVat setCategoryCode (@Nullable final String sCategoryCode)
+  {
+    m_sCategoryCode = sCategoryCode;
+    return this;
+  }
+
+  /**
+   * Get the invoiced item VAT rate (BT-152).
+   *
+   * @return Invoiced item VAT rate (BT-152). May be {@code null}.
+   */
+  @Nullable
+  public BigDecimal getRate ()
+  {
+    return m_aRate;
+  }
+
+  /**
+   * Set the invoiced item VAT rate (BT-152).
+   *
+   * @param aRate
+   *        Rate as a {@link BigDecimal} (e.g. {@code 19} for 19 %); may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceLineVat setRate (@Nullable final BigDecimal aRate)
+  {
+    m_aRate = aRate;
+    return this;
+  }
+
+  /**
+   * Get the invoiced item exemption reason text (BT-194).
+   *
+   * @return Invoiced item exemption reason text (BT-194). May be {@code null}.
+   */
+  @Nullable
+  public String getExemptionReasonText ()
+  {
+    return m_sExemptionReasonText;
+  }
+
+  /**
+   * Set the invoiced item exemption reason text (BT-194).
+   *
+   * @param sExemptionReasonText
+   *        Invoiced item exemption reason text; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceLineVat setExemptionReasonText (@Nullable final String sExemptionReasonText)
+  {
+    m_sExemptionReasonText = sExemptionReasonText;
+    return this;
+  }
+
+  /**
+   * Get the invoiced item VAT exemption reason and specification code (BT-195).
+   *
+   * @return Invoiced item VAT exemption reason and specification code (BT-195). May be {@code null}.
+   */
+  @Nullable
+  public String getExemptionReasonCode ()
+  {
+    return m_sExemptionReasonCode;
+  }
+
+  /**
+   * Set the invoiced item VAT exemption reason and specification code (BT-195).
+   *
+   * @param sExemptionReasonCode
+   *        Invoiced item VAT exemption reason and specification code; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceLineVat setExemptionReasonCode (@Nullable final String sExemptionReasonCode)
+  {
+    m_sExemptionReasonCode = sExemptionReasonCode;
+    return this;
+  }
+
+  /**
+   * Get the VAT amount (BT-X-95).
+   *
+   * @return VAT amount (BT-X-95). May be {@code null}.
+   */
+  @Nullable
+  public BigDecimal getCalculatedAmount ()
+  {
+    return m_aCalculatedAmount;
+  }
+
+  /**
+   * Set the VAT amount (BT-X-95).
+   *
+   * @param aCalculatedAmount
+   *        The new value; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceLineVat setCalculatedAmount (@Nullable final BigDecimal aCalculatedAmount)
+  {
+    m_aCalculatedAmount = aCalculatedAmount;
+    return this;
+  }
+
+  /**
+   * Get the VAT point date code (BT-X-589).
+   *
+   * @return VAT point date code (BT-X-589). May be {@code null}.
+   */
+  @Nullable
+  public String getVatPointDateCode ()
+  {
+    return m_sVatPointDateCode;
+  }
+
+  /**
+   * Set the VAT point date code (BT-X-589).
+   *
+   * @param sVatPointDateCode
+   *        The new value; may be {@code null}.
+   * @return this for chaining.
+   */
+  @NonNull
+  public PhinvoiceLineVat setVatPointDateCode (@Nullable final String sVatPointDateCode)
+  {
+    m_sVatPointDateCode = sVatPointDateCode;
+    return this;
+  }
+}

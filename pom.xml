@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2026 Philip Helger (www.helger.com)
+    philip[at]helger[dot]com
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.helger</groupId>
+    <artifactId>parent-pom</artifactId>
+    <version>3.2.0</version>
+  </parent>
+  <groupId>com.helger.phinvoice</groupId>
+  <artifactId>phinvoice-model-parent-pom</artifactId>
+  <version>0.1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>phinvoice-model-parent-pom</name>
+  <description>phinvoice-model - syntax neutral EN 16931 and ZUGFeRD EXTENDED invoice model - Parent POM</description>
+  <url>https://github.com/phax/phinvoice-model</url>
+  <inceptionYear>2026</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:https://github.com/phax/phinvoice-model.git</connection>
+    <developerConnection>scm:git:https://github.com/phax/phinvoice-model.git</developerConnection>
+    <url>https://github.com/phax/phinvoice-model</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <developers>
+    <developer>
+      <id>philip</id>
+      <name>Philip Helger</name>
+      <email>philip(at)helger.com</email>
+      <url>https://www.helger.com</url>
+    </developer>
+  </developers>
+
+  <properties>
+    <ph-commons.version>12.7.1</ph-commons.version>
+    <ph-cii.version>4.1.4</ph-cii.version>
+    <ph-ubl.version>10.3.0</ph-ubl.version>
+    <en16931-basics.version>1.1.0</en16931-basics.version>
+    <ph-forbidden-apis.version>1.1.1</ph-forbidden-apis.version>
+    <ph-poi.version>7.2.0</ph-poi.version>
+    <phive-rules.version>4.7.0</phive-rules.version>
+    <en16931-cii2ubl.version>4.0.3</en16931-cii2ubl.version>
+    <en16931-ubl2cii.version>3.0.1</en16931-ubl2cii.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- BOM imports -->
+      <dependency>
+        <groupId>com.helger.commons</groupId>
+        <artifactId>ph-commons-bom</artifactId>
+        <version>${ph-commons.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.cii</groupId>
+        <artifactId>ph-cii-bom</artifactId>
+        <version>${ph-cii.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.ubl</groupId>
+        <artifactId>ph-ubl-bom</artifactId>
+        <version>${ph-ubl.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>en16931-basics</artifactId>
+        <version>${en16931-basics.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-bom</artifactId>
+        <version>4.0.9</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.phive.rules</groupId>
+        <artifactId>phive-rules-en16931</artifactId>
+        <version>${phive-rules.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>en16931-cii2ubl</artifactId>
+        <version>${en16931-cii2ubl.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>en16931-ubl2cii</artifactId>
+        <version>${en16931-ubl2cii.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger</groupId>
+        <artifactId>ph-poi</artifactId>
+        <version>${ph-poi.version}</version>
+      </dependency>
+      
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit4.version}</version>
+      </dependency>
+
+      <!-- Internal modules -->
+      <dependency>
+        <groupId>com.helger.phinvoice</groupId>
+        <artifactId>phinvoice-model-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.phinvoice</groupId>
+        <artifactId>phinvoice-model-testfiles</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.phinvoice</groupId>
+        <artifactId>phinvoice-model-cii</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.helger.phinvoice</groupId>
+        <artifactId>phinvoice-model-ubl</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <!-- Global dependencies for all modules -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.helger.commons</groupId>
+      <artifactId>ph-unittest-support-ext</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <modules>
+    <module>phinvoice-model-bom</module>
+    <module>phinvoice-model-api</module>
+    <module>phinvoice-model-testfiles</module>
+    <module>phinvoice-model-cii</module>
+    <module>phinvoice-model-ubl</module>
+  </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>de.thetaphi</groupId>
+        <artifactId>forbiddenapis</artifactId>
+        <configuration>
+          <signaturesArtifacts>
+            <signaturesArtifact>
+              <groupId>com.helger</groupId>
+              <artifactId>ph-forbidden-apis</artifactId>
+              <version>${ph-forbidden-apis.version}</version>
+              <type>jar</type>
+              <path>forbidden-apis-java9.txt</path>
+            </signaturesArtifact>
+          </signaturesArtifacts>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

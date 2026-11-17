@@ -46,7 +46,9 @@ v0.1.0 - work in progress
 * Added `PhinvoiceContact.departmentName` and `PhinvoiceItemAttribute.numericValue`
 * Added the UBL reader (taken over from phlox) and the UBL writer `UblInvoiceWriter` for UBL 2.1 (EN 16931:2017) and UBL 2.5 (EN 16931:2026), Invoice and Credit Note
 * Added all terms of Factur-X 1.09.2 EXTENDED to the model, with the reusable classes `PhinvoiceTradeParty` and `PhinvoiceReferencedDocument`; the CII D22B reader and writer read and write them
-* The CII reader keeps every value of the source: a value without model field becomes an additional term with its XPath
+* The CII and UBL readers keep every value of the source: a value without model field becomes an additional term with its XPath and is reported as warning
+* The CII reader auto-detects Factur-X MINIMUM and BASIC WL documents as EN 16931:2017
+* The CII D25A writer writes the list agency of the non-VAT tax code (BT-177, BT-193), and the UBL 2.5 writer the list of the supporting document type code (BT-122-1-1)
 * The UBL writers and the CII D25A writer report all values of Factur-X EXTENDED (`PhinvoiceExtendedTermReporter`)
 * `PhinvoicePriceDetails` has lists of allowances and charges on the gross price (`PhinvoicePriceAllowanceCharge`); BT-147 is the amount of the first allowance
 * Added `PhinvoicePaymentTerms.dueDate` for the due dates of further payment terms in Factur-X EXTENDED

@@ -47,10 +47,15 @@ Modules (only the ones that have content are in the reactor):
     UBL 2.5, CII D25A); a new EXTENDED field must be added there as well.
   - `com.helger.phinvoice.read`: `IPhinvoiceReader`, `PhinvoiceReaderHelper`; `PhinvoiceLogHelper`
     (package `com.helger.phinvoice`) - taken over from phlox (decision D9).
+    `PhinvoiceUnmappedValueCollector` is the syntax neutral part of the safety net of the readers
+    (decision D12): it compares the source DOM with the model written again, adds every value
+    that is not written again as `PhinvoiceAdditionalTerm` (term = prefix + XPath) and reports it
+    as warning in the `ErrorList` of the reader (error field name = term).
 - `phinvoice-model-testfiles` - the test corpus taken over from `phlox-testfiles`
   (`MockPhinvoiceTestFiles`, resources under `external/en16931/`) plus `PhinvoiceModelDumper`
-  (reflection based `path = value` dump of a model, for round trip comparisons). Consumed in scope
-  `test`.
+  (reflection based `path = value` dump of a model, for round trip comparisons) and
+  `PhinvoiceReadCoverage` (every source value must be in the model; used by the read coverage
+  tests of CII and UBL). Depends on `phinvoice-model-api`; consumed in scope `test`.
 - `phinvoice-model-cii` - `CiiInvoiceReader` (`CiiD22BInvoiceReader` for D16B / D22B,
   `CiiD25AInvoiceReader`; taken over from phlox) and `CiiInvoiceWriter` (`CiiD22BInvoiceWriter` for
   all EN 16931:2017 targets, `CiiD25AInvoiceWriter` for EN 16931:2026). Each writer is the exact
@@ -64,12 +69,17 @@ Modules (only the ones that have content are in the reactor):
     is written with the BT-X ID and reported with the 2026 ID if the target has no BT-X
     (`EN2026_TERM_OF_EXTENDED_TERM`).
   - Safety net (decision D12): `CiiUnmappedValueCollector` writes the model again with the raw
-    writer and adds every source value that is not written again as `PhinvoiceAdditionalTerm`
-    (term `cii:` + XPath). A value that the reader does not map shows up there - map it.
+    writer for `PhinvoiceUnmappedValueCollector` (term prefix `cii:`). A value that the reader
+    does not map shows up there and as reader warning - map it.
+  - `CiiZugferdValidationTest` checks the output of all Factur-X profiles with
+    `phive-rules-zugferd` 2.5.2 (which needs the EN 16931 rules registered first); the failures
+    that reported drops cause are listed per target profile and file.
+  - `autoDetect ()` also recognises the BT-24 of Factur-X MINIMUM and BASIC WL (EN 16931:2017).
 
 - `phinvoice-model-ubl` - `UblInvoiceReader` (`Ubl21InvoiceReader`, `Ubl25InvoiceReader`; taken
   over from phlox) and `UblInvoiceWriter` (`Ubl21InvoiceWriter` for EN 16931:2017,
   `Ubl25InvoiceWriter` for EN 16931:2026; Invoice and Credit Note). Same inverse rule as for CII.
+  Safety net: `UblUnmappedValueCollector` (term prefix `ubl:`), checked by `UblReadCoverageTest`.
   Tests: `UblInvoiceWriterRoundTripTest`, `UblInvoiceWriterTargetTest`, `CrossSyntaxTest` (CII ↔
   UBL, needs `phinvoice-model-cii` in scope `test`), `CompareWithConvertersTest` (logs the
   differences to en16931-cii2ubl / en16931-ubl2cii, scope `test`).

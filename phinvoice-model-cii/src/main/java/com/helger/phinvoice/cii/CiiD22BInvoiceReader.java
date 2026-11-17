@@ -1063,10 +1063,15 @@ final class CiiD22BInvoiceReader extends AbstractCiiInvoiceReader
     if (aShipTo != null)
     {
       aOut.setPartyName (_text (aShipTo.getName ())); // BT-185
+      // BT-186 / BT-186-1 is the global identifier; the identifier is Factur-X EXTENDED (BT-186-00)
       final ICommonsList <PhinvoiceIdentifier> aIDs = new CommonsArrayList <> ();
-      _readPartyIdentifiers (aShipTo, aIDs);
-      // BT-186 / BT-186-1
+      for (final IDType aID : aShipTo.getGlobalID ())
+        _addIdentifier (aID, aIDs);
       PhinvoiceReaderHelper.setAndAddRepeated (aIDs, "BT-186", aOut::setLocationIdentifier, aLine.additionalTerms ());
+      PhinvoiceReaderHelper.setAndAddRepeated (new CommonsArrayList <> (aShipTo.getID (), CiiD22BInvoiceReader::_idValue),
+                                               "BT-186-00",
+                                               aOut::setPartyID,
+                                               aLine.additionalTerms ());
       if (aShipTo.getPostalTradeAddress () != null)
         aOut.setPostalAddress (_readAddress (aShipTo.getPostalTradeAddress ())); // BG-38
     }
@@ -1895,8 +1900,6 @@ final class CiiD22BInvoiceReader extends AbstractCiiInvoiceReader
       if (aShipTo != null && aOut.getDelivery () != null)
       {
         final PhinvoiceLineDelivery aDelivery = aOut.getDelivery ();
-        if (!aShipTo.getID ().isEmpty ())
-          aDelivery.setPartyID (_idValue (aShipTo.getID ().get (0)));
         aDelivery.setRoleCode (_roleCode (aShipTo));
         final LegalOrganizationType aLO = aShipTo.getSpecifiedLegalOrganization ();
         if (aLO != null)

@@ -138,6 +138,9 @@ import un.unece.uncefact.data.standard.cii.d25a.udt.TextType;
  */
 final class CiiD25AInvoiceWriter
 {
+  /** The list agency of the UNTDID code lists (UN/ECE), a syntax constant of the non-VAT tax codes */
+  private static final String LIST_AGENCY_ID_UNECE = "6";
+
   /** The tax type code of all VAT taxes (BT-95-1, BT-102-1, BT-118-1, BT-151-1) */
   private static final String TAX_TYPE_CODE_VAT = "VAT";
 
@@ -826,6 +829,8 @@ final class CiiD25AInvoiceWriter
     {
       final AllowanceChargeReasonCodeType aCode = new AllowanceChargeReasonCodeType (aDC.getNonVatTaxCode ());
       aCode.setListID (aDC.getNonVatTaxCodeListID ());
+      // Required by CII-DT-100 to CII-DT-103
+      aCode.setListAgencyID (LIST_AGENCY_ID_UNECE);
       ret.setReasonCode (aCode);
       if (m_aFilter.isAllowed ("BT-105") && aDC.getReasonCode () != null)
         m_aFilter.drop ("BT-105", aDC.getReasonCode (), "BT-105 and BT-177 share the same element");
@@ -1358,6 +1363,8 @@ final class CiiD25AInvoiceWriter
     {
       final AllowanceChargeReasonCodeType aCode = new AllowanceChargeReasonCodeType (aLC.getNonVatTaxTypeCode ());
       aCode.setListID (aLC.getNonVatTaxTypeCodeListID ());
+      // Required by CII-DT-100 to CII-DT-103
+      aCode.setListAgencyID (LIST_AGENCY_ID_UNECE);
       ret.setReasonCode (aCode);
       if (m_aFilter.isAllowed ("BT-145") && aLC.getReasonCode () != null)
         m_aFilter.drop ("BT-145", aLC.getReasonCode (), "BT-145 and BT-193 share the same element");

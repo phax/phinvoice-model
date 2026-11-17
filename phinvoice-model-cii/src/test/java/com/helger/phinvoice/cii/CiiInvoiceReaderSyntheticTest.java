@@ -35,6 +35,7 @@ import org.junit.Test;
 import com.helger.base.io.nonblocking.NonBlockingByteArrayInputStream;
 import com.helger.base.string.StringReplace;
 import com.helger.cache.regex.RegExHelper;
+import com.helger.diagnostics.error.IError;
 import com.helger.diagnostics.error.list.ErrorList;
 import com.helger.io.resource.ClassPathResource;
 import com.helger.phinvoice.model.PhinvoiceDirectDebit;
@@ -256,9 +257,14 @@ public final class CiiInvoiceReaderSyntheticTest
   {
     for (final String sFile : ALL_FILES)
     {
-      final ErrorList aErrors = new ErrorList ();
-      final PhinvoiceInvoice aModel = _readXml (sFile, _load (sFile), aErrors);
+      final ErrorList aAllErrors = new ErrorList ();
+      final PhinvoiceInvoice aModel = _readXml (sFile, _load (sFile), aAllErrors);
       assertNotNull (sFile, aModel);
+      // Without the values that the safety net of the reader reports
+      final ErrorList aErrors = new ErrorList ();
+      for (final IError aError : aAllErrors)
+        if (aError.getErrorFieldName () == null || !aError.getErrorFieldName ().startsWith (CiiUnmappedValueCollector.TERM_PREFIX))
+          aErrors.add (aError);
       assertEquals (sFile + ": " + aErrors, 2, aErrors.size ());
       assertFalse (sFile, aErrors.containsAtLeastOneError ());
       assertEquals (sFile,

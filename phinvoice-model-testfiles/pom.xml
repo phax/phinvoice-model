@@ -41,6 +41,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.helger.phinvoice</groupId>
+      <artifactId>phinvoice-model-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.helger.commons</groupId>
       <artifactId>ph-annotations</artifactId>
     </dependency>
@@ -51,6 +55,10 @@
     <dependency>
       <groupId>com.helger.commons</groupId>
       <artifactId>ph-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.helger.commons</groupId>
+      <artifactId>ph-xml</artifactId>
     </dependency>
   </dependencies>
 </project>

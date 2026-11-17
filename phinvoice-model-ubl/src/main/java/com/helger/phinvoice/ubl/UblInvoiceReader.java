@@ -148,7 +148,10 @@ public class UblInvoiceReader implements IPhinvoiceReader <InputStream>
 
     final AbstractUblInvoiceReader aReader = eEdition == EEN16931Edition.EN2026 ? new Ubl25InvoiceReader ()
                                                                                 : new Ubl21InvoiceReader ();
-    return aReader.read (aDoc, aErrors);
+    final PhinvoiceInvoice ret = aReader.read (aDoc, aErrors);
+    if (ret != null)
+      UblUnmappedValueCollector.addUnmappedValues (aDoc, ret, eEdition, aErrors);
+    return ret;
   }
 
   /**

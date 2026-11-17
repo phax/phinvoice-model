@@ -157,6 +157,9 @@ import oasis.names.specification.ubl.schema.xsd.unqualifieddatatypes_25.AmountTy
  */
 final class Ubl25InvoiceWriter
 {
+  /** The list of the supporting document type code (BT-122-1-1): UNTDID 1001, the only allowed value */
+  private static final String DOCUMENT_TYPE_CODE_LIST_ID = "1001";
+
   /** The tax scheme of all VAT taxes */
   private static final String TAX_SCHEME_VAT = AbstractUblInvoiceReader.TAX_SCHEME_VAT;
 
@@ -1300,9 +1303,10 @@ final class Ubl25InvoiceWriter
   private DocumentReferenceType _supportingDocument (@NonNull final PhinvoiceSupportingDocument aDoc)
   {
     final DocumentReferenceType ret = _documentReference (aDoc.getReference ());
-    // BT-122-1 - 916 if there is none
+    // BT-122-1 - 916 if there is none; BT-122-1-1 has only one allowed value
     ret.setDocumentTypeCode (m_aFilter.use ("BT-122-1", aDoc.getDocumentTypeCode ()) ? aDoc.getDocumentTypeCode ()
-                                                                                     : EN16931CodeLists.DOCUMENT_TYPE_CODE_SUPPORTING_DOCUMENT);
+                                                                                     : EN16931CodeLists.DOCUMENT_TYPE_CODE_SUPPORTING_DOCUMENT)
+       .setListID (DOCUMENT_TYPE_CODE_LIST_ID);
     if (m_aFilter.use ("BT-123", aDoc.getDescription ()))
       ret.addDocumentDescription (new DocumentDescriptionType (aDoc.getDescription ()));
     final AttachmentType aAttachment = new AttachmentType ();

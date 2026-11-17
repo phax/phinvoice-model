@@ -21,6 +21,9 @@ import java.io.InputStream;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.helger.cii.d22b.CIID22BCrossIndustryInvoiceTypeMarshaller;
 import com.helger.cii.d25a.CIID25ACrossIndustryInvoiceTypeMarshaller;
@@ -29,6 +32,7 @@ import com.helger.diagnostics.error.list.ErrorList;
 import com.helger.en16931.basics.EEN16931Edition;
 import com.helger.phinvoice.model.PhinvoiceInvoice;
 import com.helger.phinvoice.read.IPhinvoiceReader;
+import com.helger.phinvoice.target.EPhinvoiceProfile;
 import com.helger.xml.serialize.read.DOMReader;
 
 import un.unece.uncefact.data.standard.cii.d25a.CrossIndustryInvoiceType;
@@ -170,6 +174,26 @@ public class CiiInvoiceReader implements IPhinvoiceReader <InputStream>
   }
 
   /**
+   * Factur-X MINIMUM and BASIC WL have a BT-24 that is no EN 16931 identifier. Both only exist for
+   * EN 16931:2017.
+   */
+  @Nullable
+  private static EEN16931Edition _detectFacturXEdition (@NonNull final Document aDoc)
+  {
+    final NodeList aParams = aDoc.getElementsByTagNameNS ("*", "GuidelineSpecifiedDocumentContextParameter");
+    for (int i = 0; i < aParams.getLength (); ++i)
+      for (Node aChild = aParams.item (i).getFirstChild (); aChild != null; aChild = aChild.getNextSibling ())
+        if (aChild instanceof final Element aElement && "ID".equals (aElement.getLocalName ()))
+        {
+          final String sBT24 = aElement.getTextContent ().trim ();
+          for (final EPhinvoiceProfile eProfile : new EPhinvoiceProfile [] { EPhinvoiceProfile.MINIMUM, EPhinvoiceProfile.BASIC_WL })
+            if (sBT24.startsWith (eProfile.getFacturXSpecificationIdentifier ()))
+              return EEN16931Edition.EN2017;
+        }
+    return null;
+  }
+
+  /**
    * Read an already-parsed CII D25A document (EN 16931:2026) into a {@link PhinvoiceInvoice},
    * collecting non-fatal issues (unknown type codes, unsupported date formats, unparsable issue
    * time) into the supplied error list.
@@ -202,9 +226,11 @@ public class CiiInvoiceReader implements IPhinvoiceReader <InputStream>
     {
       eEdition = EEN16931Edition.detect (aDoc);
       if (eEdition == null)
+        eEdition = _detectFacturXEdition (aDoc);
+      if (eEdition == null)
       {
         aErrors.add (SingleError.builderError ()
-                                .errorText ("The EN 16931 edition could not be determined because BT-24 (Specification identifier) is missing or is not an EN 16931 identifier. Use CiiInvoiceReader.fromD22B() or CiiInvoiceReader.fromD25A() to select the edition explicitly.")
+                                .errorText ("The EN 16931 edition could not be determined because BT-24 (Specification identifier) is missing or is neither an EN 16931 nor a Factur-X identifier. Use CiiInvoiceReader.fromD22B() or CiiInvoiceReader.fromD25A() to select the edition explicitly.")
                                 .build ());
         return null;
       }
@@ -221,7 +247,7 @@ public class CiiInvoiceReader implements IPhinvoiceReader <InputStream>
           return null;
         }
         final PhinvoiceInvoice ret = readCrossIndustryInvoice (aCii, aErrors);
-        CiiUnmappedValueCollector.addUnmappedValues (aDoc, ret, eEdition);
+        CiiUnmappedValueCollector.addUnmappedValues (aDoc, ret, eEdition, aErrors);
         return ret;
       }
       case EN2026:
@@ -233,7 +259,7 @@ public class CiiInvoiceReader implements IPhinvoiceReader <InputStream>
           return null;
         }
         final PhinvoiceInvoice ret = readCrossIndustryInvoice (aCii, aErrors);
-        CiiUnmappedValueCollector.addUnmappedValues (aDoc, ret, eEdition);
+        CiiUnmappedValueCollector.addUnmappedValues (aDoc, ret, eEdition, aErrors);
         return ret;
       }
       default:

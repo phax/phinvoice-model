@@ -75,7 +75,7 @@ abstract class AbstractUblInvoiceReader
   private static final String PEPPOL_FILLER = "NA";
 
   private static final String ROOT_INVOICE = "Invoice";
-  private static final String ROOT_CREDIT_NOTE = "CreditNote";
+  static final String ROOT_CREDIT_NOTE = "CreditNote";
 
   /**
    * Get the UBL version this reader handles.

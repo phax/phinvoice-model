@@ -121,6 +121,20 @@ public final class CiiInvoiceReaderTest
   }
 
   @Test
+  public void testAutoDetectFacturX ()
+  {
+    // MINIMUM and BASIC WL have a BT-24 that is no EN 16931 identifier
+    for (final String sProfile : new String [] { "minimum", "basicwl", "basic", "en16931", "extended" })
+      for (final ClassPathResource aRes : MockPhinvoiceTestFiles.getCiiZugferd252Files (sProfile))
+      {
+        final ErrorList aErrors = new ErrorList ();
+        final PhinvoiceInvoice aModel = CiiInvoiceReader.autoDetect ().read (aRes.getInputStream (), aErrors);
+        assertNotNull (aRes.getPath () + ": " + aErrors.getAllErrors (), aModel);
+        assertFalse (aRes.getPath () + ": " + aErrors.getAllErrors (), aErrors.containsAtLeastOneError ());
+      }
+  }
+
+  @Test
   public void testReadCoreFiles ()
   {
     _readAllAndAssertWellFormed (MockPhinvoiceTestFiles.getCiiD16BCoreFiles (), "core", 15);
